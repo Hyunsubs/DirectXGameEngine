@@ -1,0 +1,70 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="DefaultFiles">
+      <UniqueIdentifier>{d883711b-6c10-4600-a4ef-b0d4fbd78ec6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Main">
+      <UniqueIdentifier>{69f2ba0a-c1c8-4ccd-a1bb-782928b8283f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers">
+      <UniqueIdentifier>{e8d3d048-c6a2-4bc1-b8a4-dd017357149f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\PCH">
+      <UniqueIdentifier>{266f372c-6240-4924-ad00-4f86e088cc03}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\defines">
+      <UniqueIdentifier>{200af761-c83c-4e7f-8839-8d776bd14dc0}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="framework.h">
+      <Filter>DefaultFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="GameCoding.h">
+      <Filter>DefaultFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>DefaultFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>DefaultFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h">
+      <Filter>Headers\PCH</Filter>
+    </ClInclude>
+    <ClInclude Include="Types.h">
+      <Filter>Headers\defines</Filter>
+    </ClInclude>
+    <ClInclude Include="Game.h">
+      <Filter>Main</Filter>
+    </ClInclude>
+    <ClInclude Include="Values.h">
+      <Filter>Headers\defines</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="GameCoding.ico">
+      <Filter>DefaultFiles</Filter>
+    </Image>
+    <Image Include="small.ico">
+      <Filter>DefaultFiles</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="GameCoding.cpp">
+      <Filter>Main</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp">
+      <Filter>Headers\PCH</Filter>
+    </ClCompile>
+    <ClCompile Include="Game.cpp">
+      <Filter>Main</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="GameCoding.rc">
+      <Filter>DefaultFiles</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>
