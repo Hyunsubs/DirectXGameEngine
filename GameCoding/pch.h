@@ -29,29 +29,29 @@
 #include <windows.h>
 
 
+// DirectXTex
+#include "DirectXTex/DirectXTex.h"
+#include "DirectXTex/DirectXTex.inl"
+#ifdef _DEBUG
+#pragma comment(lib, "DirectXTex/DirectXTex_d.lib")
+#else
+#pragma comment(lib, "DirectXTex/DirectXTex.lib")
+#endif
+
 // DX
+#include <DirectXMath.h>
 #include <d3d11.h>
 #include <d3dcompiler.h>
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "d3dcompiler.lib")
 
 
+
+
 // Com Objects
 #include <wrl.h>
 using namespace Microsoft::WRL;
 
-
-
-#include <DirectXMath.h>
-
-#include "DirectXTex/DirectXTex.h"
-#include "DirectXTex/DirectXTex.inl"
-
-#ifdef _DEBUG
-#pragma comment(lib, DirectXTex/DirectXTex_d.lib)
-#else
-#pragma comment(lib, DirectXTex/DirectXTex.lib)
-#endif
 
 
 #define CHECK(p) assert(SUCCEEDED(p))

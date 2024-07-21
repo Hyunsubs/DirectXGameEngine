@@ -25,6 +25,7 @@ void Game::Init(HWND hwnd)
 	CreateVS();
 	CreateInputLayout();
 	CreatePS();
+	CreateSRV();
 
 }
 
@@ -45,6 +46,7 @@ void Game::Render()
 
 		// IA
 		_deviceContext->IASetVertexBuffers(0, 1, _vertexBuffer.GetAddressOf(), &stride, &offset);
+		_deviceContext->IASetIndexBuffer(_indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
 		_deviceContext->IASetInputLayout(_inputLayout.Get());
 		_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
@@ -55,9 +57,10 @@ void Game::Render()
 
 		// PS
 		_deviceContext->PSSetShader(_pixelShader.Get(), nullptr, 0);
+		_deviceContext->PSSetShaderResources(0, 1, _srView.GetAddressOf());
 
 		// OM
-		_deviceContext->Draw(_vertices.size(), 0);
+		_deviceContext->DrawIndexed(_indices.size(), 0, 0);
 	}
 
 	RenderEnd();
@@ -154,15 +157,31 @@ void Game::SetViewPort()
 void Game::CreateGeometry()
 {
 	// VertexData
+
+	// Triangle
 	{
-		_vertices.resize(3);
+		_vertices.resize(4);
 		
 		_vertices[0].position = Vec3(-0.5f, -0.5f, 0.f);
 		_vertices[0].color = Color(1.f, 0.f, 0.f, 1.f);
-		_vertices[1].position = Vec3(0.f, 0.5f, 0.f);
+		_vertices[0].UV = Vec2(0.f, 1.f);
+
+		_vertices[1].position = Vec3(-0.5f, 0.5f, 0.f);
 		_vertices[1].color = Color(0.f, 1.f, 0.f, 1.f);
+		_vertices[1].UV = Vec2(0.f, 0.f);
+
 		_vertices[2].position = Vec3(0.5f, -0.5f, 0.f);
 		_vertices[2].color = Color(0.f, 0.f, 1.f, 1.f);
+		_vertices[2].UV = Vec2(1.f, 1.f);
+
+		_vertices[3].position = Vec3(0.5f, 0.5f, 0.f);
+		_vertices[3].color = Color(1.f, 0.f, 0.f, 1.f);
+		_vertices[3].UV = Vec2(1.f, 0.f);
+	}
+
+	// Index
+	{
+		_indices = { 0, 1, 2, 2, 1, 3 };
 	}
 
 	// VertexBuffer
@@ -180,6 +199,23 @@ void Game::CreateGeometry()
 
 		_device->CreateBuffer(&desc, &data, _vertexBuffer.GetAddressOf());
 	}
+
+	// IndexBuffer
+	{
+		D3D11_BUFFER_DESC desc;
+		ZeroMemory(&desc, sizeof(desc));
+		// 버퍼 용도에 대한 설명은 Notion에 정리 해놓았음
+		desc.Usage = D3D11_USAGE_IMMUTABLE;
+		desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+		desc.ByteWidth = (uint32)(sizeof(uint32) * _indices.size());
+
+		D3D11_SUBRESOURCE_DATA data;
+		ZeroMemory(&data, sizeof(data));
+		data.pSysMem = _indices.data(); // 시스템 메모리에 초기 데이터 설정
+
+		HRESULT hr = _device->CreateBuffer(&desc, &data, _indexBuffer.GetAddressOf());
+		CHECK(hr);
+	}
 }
 
 // GPU에 보낸 버텍스 버퍼가 어떻게 생겨먹은건지 알려주는 정보
@@ -189,6 +225,7 @@ void Game::CreateInputLayout()
 	{
 		{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
 		{"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 28, D3D11_INPUT_PER_VERTEX_DATA, 0},
 	};
 
 	const int32 count = sizeof(layout) / sizeof(D3D11_INPUT_ELEMENT_DESC); // 보낼 레이아웃 갯수
@@ -206,6 +243,18 @@ void Game::CreatePS()
 {
 	LoadShaderFromFile(L"Standard.hlsl", "PS_Main", "ps_5_0", _psBlob);
 	_device->CreatePixelShader(_psBlob->GetBufferPointer(), _psBlob->GetBufferSize(), nullptr, _pixelShader.GetAddressOf());
+}
+
+void Game::CreateSRV()
+{
+	//DirectXTex
+	DirectX::TexMetadata md;
+	DirectX::ScratchImage img;
+
+	HRESULT hr = DirectX::LoadFromWICFile(L"채원갓.jpg", DirectX::WIC_FLAGS_NONE, &md, img);
+	CHECK(hr);
+
+	hr = DirectX::CreateShaderResourceView(_device.Get(), img.GetImages(), img.GetImageCount(), md, _srView.GetAddressOf());
 }
 
 void Game::LoadShaderFromFile(const wstring& path, const string& name, const string& version, ComPtr<ID3DBlob>& blob)

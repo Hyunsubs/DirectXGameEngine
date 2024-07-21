@@ -34,6 +34,8 @@ private:
 	void CreateVS();
 	void CreatePS();
 
+	void CreateSRV();
+
 	void LoadShaderFromFile(const wstring& path, const string& name, const string& version, ComPtr<ID3DBlob>& blob);
 
 private:
@@ -44,10 +46,11 @@ private:
 	// 스왑 체인은 백 버퍼를 담당함
 	ComPtr<IDXGISwapChain> _swapChain = nullptr;
 	
-
-
-	//Render Target View
+	// Render Target View
 	ComPtr<ID3D11RenderTargetView> _rtView = nullptr;
+
+	// Shader Resource View
+	ComPtr<ID3D11ShaderResourceView> _srView = nullptr;
 
 	// MISC(잡다)
 	D3D11_VIEWPORT _viewport = { 0 };
@@ -56,7 +59,10 @@ private:
 private:
 	// Geometry
 	vector<Vertex> _vertices;
+	vector<uint32> _indices;
+
 	ComPtr<ID3D11Buffer> _vertexBuffer = nullptr;
+	ComPtr<ID3D11Buffer> _indexBuffer = nullptr;
 	ComPtr<ID3D11InputLayout> _inputLayout = nullptr;
 
 	// VS
