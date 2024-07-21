@@ -21,11 +21,16 @@ void Game::Init(HWND hwnd)
 	CreateRenderTargetView();
 	SetViewPort();
 
+	CreateGeometry();
+	CreateVS();
+	CreateInputLayout();
+	CreatePS();
+
 }
 
 void Game::Update()
 {
-	
+
 }
 
 void Game::Render()
@@ -33,7 +38,27 @@ void Game::Render()
 	RenderBegin();
 
 	// 본격적인 렌더 작업
-	
+	// IA - VS - RS - PS - OM
+	{
+		UINT stride = sizeof(Vertex);
+		UINT offset = 0;
+
+		// IA
+		_deviceContext->IASetVertexBuffers(0, 1, _vertexBuffer.GetAddressOf(), &stride, &offset);
+		_deviceContext->IASetInputLayout(_inputLayout.Get());
+		_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+		// VS
+		_deviceContext->VSSetShader(_vertexShader.Get(), nullptr, 0);
+
+		// RS
+
+		// PS
+		_deviceContext->PSSetShader(_pixelShader.Get(), nullptr, 0);
+
+		// OM
+		_deviceContext->Draw(_vertices.size(), 0);
+	}
 
 	RenderEnd();
 }
@@ -50,6 +75,7 @@ void Game::RenderBegin()
 void Game::RenderEnd()
 {
 	HRESULT hr = _swapChain->Present(1, 0);
+	CHECK(hr);
 }
 
 void Game::CreateDeviceAndSwapChain()
@@ -121,4 +147,82 @@ void Game::SetViewPort()
 	_viewport.MinDepth = 0.f;
 	_viewport.MaxDepth = 1.f;
 
+}
+
+
+// 도형의 기하학적 정의
+void Game::CreateGeometry()
+{
+	// VertexData
+	{
+		_vertices.resize(3);
+		
+		_vertices[0].position = Vec3(-0.5f, -0.5f, 0.f);
+		_vertices[0].color = Color(1.f, 0.f, 0.f, 1.f);
+		_vertices[1].position = Vec3(0.f, 0.5f, 0.f);
+		_vertices[1].color = Color(0.f, 1.f, 0.f, 1.f);
+		_vertices[2].position = Vec3(0.5f, -0.5f, 0.f);
+		_vertices[2].color = Color(0.f, 0.f, 1.f, 1.f);
+	}
+
+	// VertexBuffer
+	{
+		D3D11_BUFFER_DESC desc;
+		ZeroMemory(&desc, sizeof(desc));
+		// 버퍼 용도에 대한 설명은 Notion에 정리 해놓았음
+		desc.Usage = D3D11_USAGE_IMMUTABLE;
+		desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+		desc.ByteWidth = (uint32)(sizeof(Vertex) * _vertices.size());
+
+		D3D11_SUBRESOURCE_DATA data;
+		ZeroMemory(&data, sizeof(data));
+		data.pSysMem = _vertices.data(); // 시스템 메모리에 초기 데이터 설정
+
+		_device->CreateBuffer(&desc, &data, _vertexBuffer.GetAddressOf());
+	}
+}
+
+// GPU에 보낸 버텍스 버퍼가 어떻게 생겨먹은건지 알려주는 정보
+void Game::CreateInputLayout()
+{
+	D3D11_INPUT_ELEMENT_DESC layout[] =
+	{
+		{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
+	};
+
+	const int32 count = sizeof(layout) / sizeof(D3D11_INPUT_ELEMENT_DESC); // 보낼 레이아웃 갯수
+	_device->CreateInputLayout(layout, count, _vsBlob->GetBufferPointer(), _vsBlob->GetBufferSize(), _inputLayout.GetAddressOf()); // Shader에 대한 정보를 만들어야 함
+}
+
+void Game::CreateVS()
+{
+	// 블롭은 중요하지 않음
+	LoadShaderFromFile(L"Standard.hlsl", "VS_Main", "vs_5_0", _vsBlob);
+	_device->CreateVertexShader(_vsBlob->GetBufferPointer(), _vsBlob->GetBufferSize(), nullptr, _vertexShader.GetAddressOf());
+}
+
+void Game::CreatePS()
+{
+	LoadShaderFromFile(L"Standard.hlsl", "PS_Main", "ps_5_0", _psBlob);
+	_device->CreatePixelShader(_psBlob->GetBufferPointer(), _psBlob->GetBufferSize(), nullptr, _pixelShader.GetAddressOf());
+}
+
+void Game::LoadShaderFromFile(const wstring& path, const string& name, const string& version, ComPtr<ID3DBlob>& blob)
+{
+	const uint32 compileFlag = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
+
+	HRESULT hr = ::D3DCompileFromFile(
+		path.c_str(),
+		nullptr,
+		D3D_COMPILE_STANDARD_FILE_INCLUDE,
+		name.c_str(),
+		version.c_str(),
+		compileFlag,
+		0,
+		blob.GetAddressOf(),
+		nullptr
+	);
+
+	CHECK(hr);
 }

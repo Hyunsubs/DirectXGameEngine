@@ -14,13 +14,13 @@
 
 #include "Types.h"
 #include "Values.h"
+#include "Struct.h"
 
 // STL
 #include <vector>
 #include <list>
 #include <map>
 #include <unordered_map>
-
 
 // WIN
 #include <assert.h>
@@ -55,3 +55,5 @@ using namespace Microsoft::WRL;
 
 
 #define CHECK(p) assert(SUCCEEDED(p))
+
+using namespace std;
