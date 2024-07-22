@@ -34,6 +34,9 @@ private:
 	void CreateVS();
 	void CreatePS();
 
+	void CreateRasterizerState();
+	void CreateSamplerState();
+	void CreateBlendState();
 	void CreateSRV();
 
 	void CreateConstantBuffer();
@@ -71,6 +74,11 @@ private:
 	ComPtr<ID3D11VertexShader> _vertexShader = nullptr;
 	ComPtr<ID3DBlob> _vsBlob = nullptr;
 
+	// RS
+	// DX 11.0 기준
+	// 더 높은 버전에선 디바이스나 래스터라이저 스테이트뒤에 숫자를 붙여 업데이트 된 객체를 사용 가능
+	ComPtr<ID3D11RasterizerState> _rasterizerState = nullptr;
+
 	// PS
 	ComPtr<ID3D11PixelShader> _pixelShader = nullptr;
 	ComPtr<ID3DBlob> _psBlob = nullptr;
@@ -78,6 +86,11 @@ private:
 	// [CPU<->RAM] , [GPU<->VRAM] 이 일련의 과정 중
 	// vertex 데이터는 아직 Ram에 들어있는 단계임
 	// 이 정보를 GPU로 보내기위해선 버퍼를 만들어 넘겨야 한다.
+
+
+	// Sampler, BlendState
+	ComPtr<ID3D11SamplerState> _samplerState;
+	ComPtr<ID3D11BlendState> _blendState;
 
 private:
 	// 추후 SRT 행렬 적용
