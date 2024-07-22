@@ -26,12 +26,19 @@ void Game::Init(HWND hwnd)
 	CreateInputLayout();
 	CreatePS();
 	CreateSRV();
-
+	CreateConstantBuffer();
 }
 
 void Game::Update()
 {
+	_transformData.offset.x += 0.003f;
+	_transformData.offset.y += 0.003f;
 
+	D3D11_MAPPED_SUBRESOURCE subResource;
+	ZeroMemory(&subResource, sizeof(subResource));
+	_deviceContext->Map(_constantBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &subResource);
+	::memcpy(subResource.pData, &_transformData, sizeof(_transformData));
+	_deviceContext ->Unmap(_constantBuffer.Get(), 0);
 }
 
 void Game::Render()
@@ -49,10 +56,10 @@ void Game::Render()
 		_deviceContext->IASetIndexBuffer(_indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
 		_deviceContext->IASetInputLayout(_inputLayout.Get());
 		_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
+		
 		// VS
 		_deviceContext->VSSetShader(_vertexShader.Get(), nullptr, 0);
-
+		_deviceContext->VSSetConstantBuffers(0, 1, _constantBuffer.GetAddressOf());
 		// RS
 
 		// PS
@@ -255,6 +262,20 @@ void Game::CreateSRV()
 	CHECK(hr);
 
 	hr = DirectX::CreateShaderResourceView(_device.Get(), img.GetImages(), img.GetImageCount(), md, _srView.GetAddressOf());
+}
+
+void Game::CreateConstantBuffer()
+{
+	D3D11_BUFFER_DESC desc;
+	ZeroMemory(&desc, sizeof(desc));
+	desc.Usage = D3D11_USAGE_DYNAMIC;
+	desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	desc.ByteWidth = sizeof(TransformData);
+	desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+
+	HRESULT hr = _device->CreateBuffer(&desc, nullptr, _constantBuffer.GetAddressOf());
+	CHECK(hr);
+
 }
 
 void Game::LoadShaderFromFile(const wstring& path, const string& name, const string& version, ComPtr<ID3DBlob>& blob)

@@ -15,12 +15,17 @@ struct VS_OUTPUT
     float2 uv : TEXCOORD;
 };
 
+cbuffer TransformData : register(b0)
+{
+    float offset;
+}
+
 
 // Vertex Shader Stage
 VS_OUTPUT VS_Main(VS_INPUT input)
 {
     VS_OUTPUT output;
-    output.position = input.position;
+    output.position = input.position + offset;
     output.color = input.color;
     output.uv = input.uv;
     

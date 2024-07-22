@@ -36,6 +36,8 @@ private:
 
 	void CreateSRV();
 
+	void CreateConstantBuffer();
+
 	void LoadShaderFromFile(const wstring& path, const string& name, const string& version, ComPtr<ID3DBlob>& blob);
 
 private:
@@ -77,6 +79,10 @@ private:
 	// vertex 데이터는 아직 Ram에 들어있는 단계임
 	// 이 정보를 GPU로 보내기위해선 버퍼를 만들어 넘겨야 한다.
 
+private:
+	// 추후 SRT 행렬 적용
+	TransformData _transformData;
+	ComPtr<ID3D11Buffer> _constantBuffer;
 
 };
 
